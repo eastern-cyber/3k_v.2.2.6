@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,12 +25,15 @@ ENVIRONMENT = env('ENVIRONMENT', default='development')
 
 POSTGRES_LOCALLY = False
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY', default="secret-key")
+# SECRET_KEY = env('SECRET_KEY', default="secret-key")
+
+# Security settings
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-dev-key')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == 'development':
@@ -36,9 +41,14 @@ if ENVIRONMENT == 'development':
 else:
     DEBUG = False
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localhost", "http://127.0.0.1"])
+# Allow all hosts initially (update with your Railway domain later)
+ALLOWED_HOSTS = ['*']
 
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+
+# ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+# CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localhost", "http://127.0.0.1"])
 
 # Application definition
 
@@ -90,6 +100,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -98,7 +109,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 if DEBUG:
     MIDDLEWARE += ['django_browser_reload.middleware.BrowserReloadMiddleware']
@@ -151,7 +161,7 @@ else:
 import dj_database_url
 if ENVIRONMENT == 'production' or POSTGRES_LOCALLY: 
     DATABASES = {
-        'default': dj_database_url.parse(env("DATABASE_URL", default="sqlite:///db.sqlite3"))
+        'default': dj_database_url.config(default='sqlite:///db.sqlite3')
     }
 else:
     DATABASES = {
@@ -192,15 +202,21 @@ USE_I18N = True
 
 USE_TZ = True
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [ BASE_DIR / "static" ]
-STATIC_ROOT = BASE_DIR / 'staticfiles' 
+# STATIC_URL = 'static/'
+# STATICFILES_DIRS = [ BASE_DIR / "static" ]
+# STATIC_ROOT = BASE_DIR / 'staticfiles' 
 
-MEDIA_URL = 'media/'
+# MEDIA_URL = 'media/'
 
 if ENVIRONMENT == "development":
     MEDIA_ROOT = BASE_DIR / "media"
