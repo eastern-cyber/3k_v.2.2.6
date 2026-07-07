@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn _core.wsgi --log-file -
+web: daphne -b 0.0.0.0 -p $PORT _core.asgi:application
