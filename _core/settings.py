@@ -55,11 +55,12 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     'https://v226.3kok.app',
-    'https://3k-v226.up.railway.app'
+    'https://3k-v226.up.railway.app',  # ✅ Fixed missing comma
     'https://3k-v227.up.railway.app',
     'https://127.0.0.1',
     'https://localhost'
 ]
+
 # CSRF trusted origins
 # CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
 # CSRF_TRUSTED_ORIGINS = ['https://v226.3kok.app', 'https://3k-v226.up.railway.app']
@@ -175,7 +176,6 @@ else:
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-import dj_database_url
 if ENVIRONMENT == 'production' or POSTGRES_LOCALLY: 
     DATABASES = {
         'default': dj_database_url.config(default='sqlite:///db.sqlite3')
@@ -224,32 +224,18 @@ STATICFILES_DIRS = [ BASE_DIR / "static" ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-# STATIC_URL = 'static/'
-# STATICFILES_DIRS = [ BASE_DIR / "static" ]
-# STATIC_ROOT = BASE_DIR / 'staticfiles' 
-
-# MEDIA_URL = 'media/'
-
+# Media files (user uploads)
 if ENVIRONMENT == "development":
-    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_ROOT = BASE_DIR / "media"           # Local: ./media/
 else:
-    MEDIA_ROOT = "/app/media"
+    MEDIA_ROOT = "/app/media"                 # Production: Railway volume
 
-# if ENVIRONMENT == 'production' or POSTGRES_LOCALLY:
-#     STORAGES = {
-#         "default": {
-#             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-#         },
-#         "staticfiles": {
-#             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-#         },
-#     }
+MEDIA_URL = '/media/'                         # URL prefix for media files
+
+# Ensure media directory exists
+if ENVIRONMENT == "production":
+    import os
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
